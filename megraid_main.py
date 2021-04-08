@@ -23,10 +23,6 @@ def copy_files_if_needed_and_check(raws, subject, subject_megraid_visit_folder, 
             logging.error(f'There exists a typo between {subject} and one of its filenames: {raw}\n')
             did_we_catch_the_file_tracker += 1
             continue
-        elif mgr_fcn.redcap_is_not_consistent(subject, mgr_cfg.redcap_records, subject_paradigm_visit_folder):
-            # RedCap consistency logging occurs in megraid_functions.redcap_is_not_consistent function due to verbosity
-            did_we_catch_the_file_tracker +=1
-            continue
         elif not os.path.isfile(dest_file): # copy the file and log the file being copied
             logging.info(f'Copying {source_file} to {dest_file} for {subject}\n')
             shutil.copyfile(source_file, dest_file)

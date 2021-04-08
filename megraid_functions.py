@@ -94,33 +94,6 @@ def subject_id_does_match(subject, filename):
     subject_id_in_filename = filename_identifiers[0]
     return subject == subject_id_in_filename
 
-
-def redcap_is_not_consistent(subject, records, paradigm_visit_folder):
-    """
-    
-    :param subject: string denoting the current subject's ID 
-    :param records: list of dictionaries holding Transcend's subjects' records
-    :param paradigm_vist_folder: string representing the subject's paradigm, visit date path
-    """
-    # infer the paradigm and visit date from the paradigm_visit_folder string
-    paradigm_visit_path_identifiers = os.path.split(paradigm_visit_folder)
-    paradigm = paradigm_visit_path_identifiers.split('/')[-2]
-    visit_yymmdd = paradigm_visit_path_identifiers[1].split('_')[1]
-
-    # grab corresponding subject records, as well as filter by visit date
-    subject_records = [record for record in records if record['subject_id'] == subject]
-    meg_visit_record = [meg_record for meg_record in subject_records if 'event' in meg_record['redcap_event_name'] and
-                         meg_record['meg_dov'].replace('-', '') == visit_yymmdd][0]
-
-    # now we can check if the paradigm was recorded/noted or not, and act accordingly
-    is_consistent = True if meg_visit_record[paradigm] else False
-    if not is_consistent:
-        main_log.error(f"{subject} has inconsistencies between MEGRAID and RedCap for paradigm {paradigm} on visit date {visit_yymmdd}.\n"
-                      f"Below are qualitative notes taken during their visit\n{meg_visit_record['meg_comments']}\n{meg_visit_record['meg_flag_comments']}\n")
-    return is_consistent
-
-
-
 def compose_and_send_email_update(log_file, date, recipient):
     """
     use the simple mail transfer protocol to attach the log file to an email
