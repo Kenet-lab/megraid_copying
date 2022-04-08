@@ -14,8 +14,18 @@ def is_not_valid_subject(folder_name): # this should be a bit more sophisticated
     :param folder_name: string representing a subject's folder in MEGRAID
     :return: True (invalid), False (valid)
     """
-    id = folder_name.split('_')[-1] # MEGRAID folders follow "subj_SUBJECTID" pattern
-    return not id.isnumeric() and len(id) == 6 or 'AC' in id
+    if '_' in folder_name:
+        subject_id = folder_name.split('_')[-1]
+        if not subject_id.isnumeric() or 'AC' not in subject_id:
+            return False
+        else:
+            return True
+    else:
+        return True
+        
+    #subject_id = folder_name.split('_')[-1]
+    #id = folder_name.split('_')[-1] # MEGRAID folders follow "subj_SUBJECTID" pattern
+    #return not id.isnumeric() and len(id) == 6 or 'AC' in id
 
 
 def refine_search_by(subject_folder, dates, paradigms):
@@ -66,10 +76,11 @@ def prepare_to_copy_files(subject, meg_dir, subject_megraid_dir, visit_paradigm_
     :param list_of_raws: list of strings for each raw file
     :return: MEGRAID visit folder path, subject's paradigm visit folder path, fixation = True/False
     """
+    
     megraid_visit = visit_paradigm_pair.split('_')[0]
     megraid_visit_folder = os.path.join(subject_megraid_dir, megraid_visit)
     # read the measurement date from the .fif header
-    measurement_date = i_o.read_measure_date(read_info(os.path.join(megraid_visit_folder, list_of_raws[0])))
+    measurement_date = i_o.read_measure_date(read_info(os.path.join(megraid_visit_folder, list_of_raws[0]), verbose=False))
 
     paradigm = visit_paradigm_pair.split('_')[1]
     paradigm_dir = os.path.join(meg_dir, paradigm)
@@ -77,7 +88,10 @@ def prepare_to_copy_files(subject, meg_dir, subject_megraid_dir, visit_paradigm_
     fixation = True if paradigm == 'fix' else False
 
     subject_paradigm_folder = os.path.join(paradigm_dir, subject)
-    subject_paradigm_visit_folder = os.path.join(subject_paradigm_folder, f'visit_{measurement_date}')
+    if 'erm' in paradigm:
+        subject_paradigm_visit_folder = os.path.join(subject_paradigm_folder, f'{measurement_date}')
+    else:
+        subject_paradigm_visit_folder = os.path.join(subject_paradigm_folder, f'visit_{measurement_date}')
     for subdir in [subject_paradigm_folder, subject_paradigm_visit_folder]:
         i_o.check_and_build_subdir(subdir)
 
